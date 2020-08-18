@@ -38,12 +38,7 @@ class To_Do extends Controller
         return redirect('/');
     }
 
-    public function delete($id){
-        $delete_todo = ToDo::find($id);
-        $delete_todo->delete();
-        return redirect('/');
-        // current user owner of delete post
-    }
+
 
     public function signup(){
         if (!Auth::check()){
@@ -103,9 +98,32 @@ class To_Do extends Controller
 
     }
 
+
+        public function delete($id){
+            if(Auth::check()){
+                try{
+        $delete_todo = ToDo::where('user_id','=',Auth::user()->id)->where('id','=',$id)->firstOrFail();
+    }
+
+    catch (Exception $e){
+        return redirect('/');
+             }   
+        $delete_todo->delete();
+        return redirect('/');
+            }
+        return redirect('/');
+        // current user owner of delete post
+    }
+
     public function complete($id){
         if(Auth::check()){
-        $complete_todo = ToDo::where('user_id','=',Auth::user()->id)->find($id);
+
+            try{
+        $complete_todo = ToDo::where('user_id','=',Auth::user()->id)->where('id','=',$id)->firstOrFail();
+                  }
+             catch (Exception $e){
+             return redirect('/');
+                  }   
         $complete_todo->status = 'yes';
         $complete_todo->Completed = now();
         $complete_todo->update();
@@ -117,9 +135,16 @@ class To_Do extends Controller
     public function edit($id){
         if(Auth::check()){
 
+        try{
+            $edit_todo = ToDo::where('user_id','=',Auth::user()->id)->where('id','=',$id)->firstOrFail();
+            return view('edit',compact('edit_todo'));
 
-        $edit_todo = ToDo::where('user_id','=',Auth::user()->id)->find($id);
-        return view('edit',compact('edit_todo'));
+        }
+
+        catch (Exception $e){
+            return redirect('/');
+        }   
+        
         }
         return redirect('/');
     }
